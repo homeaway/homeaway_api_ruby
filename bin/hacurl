@@ -1,0 +1,176 @@
+#!/usr/bin/env ruby
+
+# Copyright (c) 2015 HomeAway.com, Inc.
+# All rights reserved.  http://www.homeaway.com
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+require 'homeaway_api'
+require 'optparse'
+require 'json'
+require 'mechanize'
+require 'cgi'
+require 'json_color'
+
+options = {
+    :auth_only => false,
+    :type => :owner
+}
+parser = OptionParser.new do |opts|
+  opts.banner = 'Usage: hacurl [options] url'
+
+  opts.on('-i', '--client-id CLIENT_ID', 'your client id') do |id|
+    options[:client_id] = id
+  end
+
+  opts.on('-s', '--client-secret CLIENT_SECRET', 'your client secret') do |secret|
+    options[:client_secret] = secret
+  end
+
+  opts.on('-e', '--email EMAIL', 'optional email address to use for operations that require 3-legged-oauth') do |email|
+    options[:email] = email
+  end
+
+  opts.on('-p', '--password PASSWORD', 'optional password to use for operations that require 3-legged-oauth') do |email|
+    options[:password] = email
+  end
+
+  opts.on('-d', '--data FILE', 'path to file for any operations that require a body (PUT OR POST)') do |path|
+    options[:data_path] = path
+  end
+
+  opts.on('-X', '--method METHOD', 'method to send (GET, PUT, POST)') do |method|
+    options[:method] = method.downcase.to_sym
+  end
+
+  opts.on('-a', '--get-auth', 'only output the bearer authorization') do
+    options[:auth_only] = true
+  end
+
+  opts.on('-v', '--verbose', 'print verbose information') do
+    options[:verbose] = true
+  end
+
+  opts.on('-t', '--traveler', 'login as a traveler') do
+    options[:type] = :traveler
+  end
+
+  opts.on('-o', '--owner', 'login as an owner (the default)') do
+    options[:type] = :owner
+  end
+
+end
+
+parser.parse!
+
+ARGV.clear if options[:auth_only]
+
+if ARGV.size == 0 and !options[:auth_only]
+  $stderr.puts 'url is requred'
+  $stderr.puts parser.help
+  exit 1
+end
+
+url = ARGV.first
+
+if options[:client_id].nil?
+  $stderr.puts 'client id is required'
+  $stderr.puts parser.help
+  exit 1
+end
+
+if options[:client_secret].nil?
+  $stderr.puts 'client secret is required'
+  $stderr.puts parser.help
+  exit 1
+end
+
+configuration = {
+    site: 'https://ws.homeaway.com',
+}
+
+method = :get
+allowed_methods = [:get, :post, :put]
+method = options[:method] if options[:method] && allowed_methods.include?(options[:method].downcase.to_sym)
+data = nil
+if options[:data_path]
+  unless File.exist?(options[:data_path])
+    $stderr.puts "#{:data_path} does not exist"
+    $stderr.puts parser.help
+    exit 1
+  end
+  file = File.open(options[:data_path], 'r')
+  data = (JSON.load(file)).to_hash
+  file.close
+end
+
+oauth_site = configuration[:site]
+oauth_site = configuration[:oauth_site] if configuration.has_key?(:oauth_site)
+
+client = HomeAway::API::Client.new(
+    client_id: options[:client_id],
+    client_secret: options[:client_secret],
+    cas_url: configuration[:cas_url],
+    site: configuration[:site],
+    oauth_site: oauth_site
+)
+
+if options[:email] and options[:password]
+  agent = Mechanize.new
+  auth_url = "https://cas.homeaway.com/auth/homeaway/login?service=https%3A%2F%2Fws.homeaway.com%2Foauth%2Fowner%2Fj_spring_cas_security_check%3Fspring-security-redirect%3Dhttps%253A%252F%252Fws.homeaway.com%252Foauth%252Fowner%252FauthorizeOwner%253Fclient_id%253D#{options[:client_id]}%2526"
+  auth_url = "https://cas.homeaway.com/auth/homeaway/login?service=https%3A%2F%2Fws.homeaway.com%2Foauth%2Ftraveler%2Fj_spring_cas_security_check%3Fspring-security-redirect%3Dhttps%253A%252F%252Fws.homeaway.com%252Foauth%252Ftraveler%252FauthorizeTraveler%253Fclient_id%253D#{options[:client_id]}%2526" if options[:type] == :traveler
+  agent.get(auth_url) do |login_page|
+    login_page.form_with(:id => 'login-form') do |form|
+      form.username = options[:email]
+      form.password = options[:password]
+    end.submit
+
+    agent.follow_redirect = false
+    agent.get("https://cas.homeaway.com/auth/homeaway/login?service=https://ws.homeaway.com/oauth/authenticate?clientId=#{options[:client_id]}") do |page|
+      unless page.response['location']
+        $stderr.puts 'Login failed. Please check the email and password provided'
+        exit 1
+      end
+      client.oauth_code = CGI.parse(URI.parse(page.response['location']).query)['ticket'].first
+    end
+  end
+end
+
+if options[:auth_only]
+  puts "Bearer #{client.token}"
+  exit 0
+end
+
+begin
+  uri = URI.parse(url)
+  begin
+    query = CGI.parse(uri.query)
+  rescue => _
+    query = {}
+  end
+  path = uri.path
+  path = "/public#{path}" unless path.start_with? '/public'
+  if method == :get
+    response = client.send(method, path, query)
+  else
+    response = client.send(method, path, data, query)
+  end
+rescue => e
+  $stderr.puts e.to_s
+  exit 1
+end
+response_hash = response.to_hash
+response_hash.delete('Metadata')
+puts JSON.pretty_generate(response._metadata.to_hash) if options[:verbose]
+puts JsonColor.colorize(JSON.pretty_generate(response_hash))
+exit 0
