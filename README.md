@@ -1,5 +1,7 @@
 # HomeAway API
 
+[![Gem Version](https://badge.fury.io/rb/homeaway-api.svg)](https://badge.fury.io/rb/homeaway-api)
+
 A Ruby SDK to interact with the HomeAway API
 
 ## Installation
