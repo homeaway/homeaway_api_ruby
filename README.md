@@ -118,7 +118,7 @@ $ hacurl -i <your_client_id> -s <your_client_secret> /public/listing?id=123456
 
 ## Other
 
-The full API documentation is located at: https://homeaway.com/platform/documentation
+The full API documentation is located at: https://www.homeaway.com/platform/documentation
 
 ## Contributing
 
