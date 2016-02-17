@@ -9,7 +9,7 @@ A Ruby SDK to interact with the HomeAway API
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'homeaway_api'
+gem 'homeaway-api'
 ```
 
 And then execute in the checked out directory to install into your system gems:
