@@ -26,7 +26,7 @@ module HomeAway
         #
         #
         # @param listing_id [String] The listingId of the listing to get the reservations for.
-        # @option opts [String] :degin_date Lower bound date of the reservations to find in the format yyyy-MM-dd
+        # @option opts [String] :begin_date Lower bound date of the reservations to find in the format yyyy-MM-dd
         # @option opts [String] :reference_number Reference number to filter on
         # @option opts [String] :end_date Upper bound date of the reservations to find in the format yyyy-MM-dd
         # @option opts [String] :last_name Last name of traveler to filter on
