@@ -30,7 +30,7 @@ Once you have these credentials, to use this gem:
 
 ```ruby
 require 'homeaway_api'
-client = HomeAway::API::Client.new(client_id: your_client_id, client_secret: your_client_secret)
+client = HomeAway::API::Client.new(client_id: 'your_client_id', client_secret: 'your_client_secret')
 ```
 
 This will automatically have your client authenticate with HomeAway. If you wish to have your application be able to access the personal HomeAway data of the user of your application, you need to call:
@@ -53,8 +53,10 @@ If you have a token string saved from a previous use of the HomeAway API it can 
 
 ```ruby
 client = HomeAway::API::Client.new(
-      token: 'saved_token_value'
-  )
+    client_id: 'your_client_id',
+    client_secret: 'your_client_secret',
+    token: 'saved_token_value'
+)
 ```
 
 ### Custom configuring the client
