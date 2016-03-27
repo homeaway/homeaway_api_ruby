@@ -122,6 +122,30 @@ $ hacurl -i <your_client_id> -s <your_client_secret> /public/listing?id=123456
 
 The full API documentation is located at: https://www.homeaway.com/platform/documentation
 
+## Running tests
+
+Create a file `internal/spec_helper_extensions.rb` with:
+
+```ruby
+def client_id
+  "your-application-client-id"
+end
+
+def client_secret
+  "your-application-client-secret"
+end
+
+def test_email
+  "your-homeaway-email"
+end
+
+def test_password
+  "your-homeaway_password"
+end
+```
+
+Run specs with `bundle exec rspec spec`.
+
 ## Contributing
 
 1. Fork it https://github.com/homeaway/homeaway_api_ruby
