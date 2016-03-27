@@ -25,9 +25,16 @@ module HomeAway
           Base64.strict_encode64 "#{@configuration.client_id}:#{@configuration.client_secret}"
         end
 
-        # @private
+        # @return [String] the authorization URL you need to redirect a HomeAway user
+        #                  to grant you access to their account.
         def auth_url
-          oauth_client_strategy.authorize_url
+          oauth_client_strategy.authorize_url(state: state)
+        end
+
+        # @return [String] a 48 characters long, securely random string, used to mitigate
+        #                  CSRF attacks during the authorization process.
+        def state
+          @_state ||= SecureRandom.hex(24)
         end
 
         # completes the oauth flow

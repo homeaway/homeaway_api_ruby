@@ -21,8 +21,22 @@ describe 'oauth', :vcr do
     @client = scaffolded_client
   end
 
-  it 'has a proper authorize url' do
-    expect(@client.auth_url).to include '/oauth/authorize'
+  describe '#auth_url' do
+    it 'has a proper authorize url' do
+      expect(@client.auth_url).to include '/oauth/authorize'
+    end
+
+    it 'includes the state parameter' do
+      expect(@client).to receive(:state).and_return("SECURE_RANDOM_STRING")
+      expect(@client.auth_url).to include 'state=SECURE_RANDOM_STRING'
+    end
+  end
+
+  describe '#state' do
+    it 'generates a secure random string' do
+      expect(SecureRandom).to receive(:hex).with(24).and_return("SECURE_RANDOM_STRING")
+      expect(@client.state).to eq "SECURE_RANDOM_STRING"
+    end
   end
 
   it 'can go with the oauth flow' do
