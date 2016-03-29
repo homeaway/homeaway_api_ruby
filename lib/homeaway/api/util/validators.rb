@@ -33,7 +33,7 @@ module HomeAway
             input = Chronic.parse(input, :ambiguous_time_range => :none)
           end
           raise ArgumentError.new('dates must be a parseable date string or a Ruby Time object') unless input.is_a? Time
-          input.to_time.utc.iso8601
+          input.to_date.to_s
         end
 
         # @private
