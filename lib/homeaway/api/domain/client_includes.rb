@@ -15,6 +15,7 @@
 
 require 'homeaway/api/domain/listing'
 require 'homeaway/api/domain/listing_reviews'
+require 'homeaway/api/domain/listing_review'
 require 'homeaway/api/domain/search'
 require 'homeaway/api/domain/quote'
 require 'homeaway/api/domain/my_listings'
@@ -30,6 +31,7 @@ module HomeAway
     class Client
       include HomeAway::API::Domain::Listing
       include HomeAway::API::Domain::ListingReviews
+      include HomeAway::API::Domain::ListingReview
       include HomeAway::API::Domain::Search
       include HomeAway::API::Domain::Quote
       include HomeAway::API::Domain::MyListings

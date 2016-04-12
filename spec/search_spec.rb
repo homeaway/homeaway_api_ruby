@@ -90,4 +90,13 @@ describe 'searching', :vcr do
     }.to_not raise_error
   end
 
+  it 'can make a GET call search for listings with a large page size' do
+    expect {
+      response = @client.search q: 'austin sleeps 6', page_size: 20
+      expect(response.pageSize).to eql 20
+      expect(response.page_size).to eql 20
+      next_page = response.next_page
+    }.to_not raise_error
+  end
+
 end
