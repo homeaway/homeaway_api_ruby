@@ -53,4 +53,14 @@ describe 'oauth', :vcr do
       @client.oauth_code = 'invalid_auth_code_here'
     }.to raise_error(HomeAway::API::Errors::UnauthorizedError)
   end
+
+  it 'can properly use refresh tokens' do
+    client = authd_client
+    refresh_token = client.refresh_token
+    new_client = client_from_refresh_token(refresh_token)
+    expect {
+      me = new_client.me
+      expect(me.email_address).to eql test_email
+    }.to_not raise_error
+  end
 end

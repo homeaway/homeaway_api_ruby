@@ -25,5 +25,6 @@ describe 'booking stays', :vcr do
     expect {
       @client.book_stay(100000, 386884, 4, '647 days from now', '650 days from now')
     }.to_not raise_error
+    fail 'asdf'
   end
 end

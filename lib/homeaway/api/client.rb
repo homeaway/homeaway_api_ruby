@@ -33,7 +33,7 @@ module HomeAway
       include HomeAway::API::Util::OAuth
 
       attr_accessor :configuration
-      attr_reader :mode, :token, :token_expires
+      attr_reader :mode, :token, :token_expires, :refresh_token
 
       # @!attribute [rw] configuration
       #   @return [Hash] the current client configuration
@@ -52,13 +52,14 @@ module HomeAway
       #
       # @option opts [String] :client_id Your HomeAway API OAuth client id. Required here if not set globally
       # @option opts [String] :client_secret Your HomeAway API OAuth client secret. Required here if not set globally
-      # @option opts [String] :token An existing token if you already have one saved from a previous usage of the api
+      # @option opts [String] :refresh_token An existing token if you already have one saved from a previous usage of the api
       # @return [HomeAway::API::Client] a newly instantiated HomeAway API client
       def initialize(opts={})
         @configuration = Hashie::Mash.new(self.class.default_configuration.merge(opts))
-        if opts.has_key?(:token)
+        if opts.has_key?(:refresh_token)
           @configuration[:manual_token_supplied] = true
-          set_token(opts.delete(:token))
+          @refresh_token = opts.delete(:refresh_token)
+          refresh
         end
         validate_configuration
         logger.debug("client initialized with configuration: #{@configuration}")
@@ -83,6 +84,11 @@ module HomeAway
       def token
         raise HomeAway::API::Errors::HomeAwayAPIError.new('Ticket must be supplied') if @token.nil?
         @token
+      end
+
+      # @return [String] The current refresh token
+      def refresh_token
+        @refresh_token
       end
 
       # @private
@@ -200,23 +206,22 @@ module HomeAway
         end
       end
 
-      def set_token(token)
-        @token = token
-        begin
-          listing '100000'
-          begin
-            me
-            logger.info('token supplied on client initialization provided 3-legged oauth')
-            @mode = :three_legged
-          rescue => e
-            logger.info('token supplied on client initialization provided 2-legged oauth')
-            @mode = :two_legged
-          end
-        rescue => e
-          logger.error("token supplied on client initialization was not valid: #{e.to_s}")
-          @mode = :unauthorized
-        end
-      end
+      # def refresh_token=(refresh_token_value)
+      #   begin
+      #     listing '100000'
+      #     begin
+      #       me
+      #       logger.info('token supplied on client initialization provided 3-legged oauth')
+      #       @mode = :three_legged
+      #     rescue => e
+      #       logger.info('token supplied on client initialization provided 2-legged oauth')
+      #       @mode = :two_legged
+      #     end
+      #   rescue => e
+      #     logger.error("token supplied on client initialization was not valid: #{e.to_s}")
+      #     @mode = :unauthorized
+      #   end
+      # end
     end
   end
 end

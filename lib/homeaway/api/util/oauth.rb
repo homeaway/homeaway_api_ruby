@@ -39,6 +39,7 @@ module HomeAway
             token = auth_code_strategy.get_token(code, :headers => {'Authorization' => "Basic #{credentials}"})
             @token = token.token
             @token_expires = Time.at token.expires_at
+            @refresh_token = token.refresh_token
             @mode = :three_legged
             return true
           rescue => _
@@ -48,11 +49,14 @@ module HomeAway
 
         private
 
+        def oauth_site
+          @configuration[:oauth_site] ||= @configuration[:site]
+        end
+
         def oauth_client
-          site = @configuration[:oauth_site] ||= @configuration[:site]
           OAuth2::Client.new(@configuration.client_id,
                              @configuration.client_secret,
-                             :site => site,
+                             :site => oauth_site,
                              :raise_errors => false
           )
         end
@@ -69,11 +73,25 @@ module HomeAway
             token = client_credentials_strategy.get_token
             @token = token.token
             @token_expires = Time.at token.expires_at
+            @refresh_token = token.refresh_token
             @mode = :two_legged
             return true
           rescue => _
             raise HomeAway::API::Errors::UnauthorizedError.new
           end
+        end
+
+        def refresh
+          token = OAuth2::AccessToken.new(oauth_client, nil, {:refresh_token => @refresh_token})
+          params = {
+              :headers => {'Authorization' => "Basic #{credentials}"}
+          }
+          token = token.refresh!(params)
+          @token = token.token
+          @token_expires = Time.at token.expires_at
+          @refresh_token = token.refresh_token
+          @mode = :three_legged
+          true
         end
       end
     end

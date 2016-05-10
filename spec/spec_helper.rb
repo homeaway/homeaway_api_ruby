@@ -87,10 +87,6 @@ def test_password
   raise NotImplementedError.new 'must supply a valid user password'
 end
 
-if File.exists? 'internal/spec_helper_extensions.rb'
-  require_relative '../internal/spec_helper_extensions.rb'
-end
-
 def scaffolded_client
   client = HomeAway::API::Client.new(
       client_id: client_id,
@@ -142,4 +138,22 @@ def authd_client
     cache.client = client
   end
   client
+end
+
+def client_from_refresh_token(refresh_token)
+  HomeAway::API::Client.new(
+      client_id: client_id,
+      client_secret: client_secret,
+      connection_opts: {
+          ssl: {
+              verify: true
+          }
+      },
+      refresh_token: refresh_token,
+      site: 'https://ws.homeaway.com',
+  )
+end
+
+if File.exists? 'internal/spec_helper_extensions.rb'
+  require_relative '../internal/spec_helper_extensions.rb'
 end

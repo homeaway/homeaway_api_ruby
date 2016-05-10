@@ -53,7 +53,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'vcr'
   spec.add_development_dependency 'json'
   spec.add_development_dependency 'multi_json'
-  spec.add_development_dependency 'webmock'
+  spec.add_development_dependency 'webmock', '< 2.0.0'
   spec.add_development_dependency 'simplecov'
   spec.add_development_dependency 'faker'
   spec.add_development_dependency 'multi_xml'
