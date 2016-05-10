@@ -206,22 +206,6 @@ module HomeAway
         end
       end
 
-      # def refresh_token=(refresh_token_value)
-      #   begin
-      #     listing '100000'
-      #     begin
-      #       me
-      #       logger.info('token supplied on client initialization provided 3-legged oauth')
-      #       @mode = :three_legged
-      #     rescue => e
-      #       logger.info('token supplied on client initialization provided 2-legged oauth')
-      #       @mode = :two_legged
-      #     end
-      #   rescue => e
-      #     logger.error("token supplied on client initialization was not valid: #{e.to_s}")
-      #     @mode = :unauthorized
-      #   end
-      # end
     end
   end
 end
