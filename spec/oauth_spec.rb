@@ -47,6 +47,11 @@ describe 'oauth', :vcr do
     expect(@client.token).to_not be_nil
   end
 
+  it 'gets back the proper state when following the oauth flow' do
+    expect(@client).to receive(:state).and_return("SECURE_RANDOM_STRING")
+    expect(get_state).to eql "SECURE_RANDOM_STRING"
+  end
+
   it 'can auth with only 2 legs' do
     expect {
       expect(@client.listing('100000')).to_not be_nil
