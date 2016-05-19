@@ -26,7 +26,7 @@ module HomeAway
         # * X-HomeAway-DisplayLocale: If a locale is not specified in a query param, it will be searched for in the X-HomeAway-DisplayLocale Header. If it is not supplied in either area the default locale of the user will be selected if it exists. Otherwise the Accept-Language Header will be used.
         #
         # @param id [String] The id of the listing.
-        # @option opts [String] :q Use the q parameter to fetch specific listing details.Valid options are AVAILABILITY, DETAILS, LOCATIONS, PHOTOS, RATES, REVIEWS If no value is given, the listing is returned with minimal content., can be an array of multiple values
+        # @option opts [String] :q Use the q parameter to fetch specific listing details. Valid options are AVAILABILITY, DETAILS, LOCATIONS, PHOTOS, RATES, REVIEWS. If no value is given, the listing is returned with minimal content. Can be an array of multiple values.
         # @return [HomeAway::API::Response] the result of the call to the API
         def listing(id, q=nil)
           params = {'id' => id.to_s}
