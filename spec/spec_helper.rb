@@ -102,21 +102,47 @@ def scaffolded_client
 end
 
 def get_code
+  get_authorizing_location_params['ticket'].first
+end
+
+def get_state
+  get_authorizing_location_params['state'].first
+end
+
+def get_authorizing_location_params
+  CGI.parse(URI.parse(get_authorizing_location).query)
+end
+
+def get_authorizing_location
+  state = @client.present? ? @client.state : nil
   agent = Mechanize.new
   #default to logging in as an owner with the following url
-  auth_url = "https://cas.homeaway.com/auth/homeaway/login?service=https%3A%2F%2Fws.homeaway.com%2Foauth%2Fowner%2Fj_spring_cas_security_check%3Fspring-security-redirect%3Dhttps%253A%252F%252Fws.homeaway.com%252Foauth%252Fowner%252FauthorizeOwner%253Fclient_id%253D#{client_id}%2526"
+  auth_url = "https://cas.homeaway.com/auth/homeaway/login?service=" +
+    "https%3A%2F%2Fws.homeaway.com%2Foauth%2Fowner%2Fj_spring_cas_security_check%3F" +
+    "spring-security-redirect%3Dhttps%253A%252F%252Fws.homeaway.com%252Foauth%252Fowner%252F" +
+    "authorizeOwner%253Fclient_id%253D#{client_id}%2526state%253D#{state}%2526"
   agent.get(auth_url) do |login_page|
     login_page.form_with(:id => 'login-form') do |form|
       form.username = test_email
       form.password = test_password
     end.submit
 
+    page = agent.get("https://ws.homeaway.com/platform2/oauth/grantAccessToken?clientId=#{client_id}")
+    json_response = JSON.parse(page.content)
+    grant_access_token = CGI.escape(json_response["token"])
+    user_uuid = json_response["userUUID"]
+
+    service_url = "https://ws.homeaway.com/oauth/authenticate?clientId=#{client_id}&" +
+      "grantAccessToken=#{grant_access_token}&userUUID=#{user_uuid}&accessGranted=true&"+
+      "state=#{state}"
+    encoded_service_url = CGI.escape(service_url)
+
     agent.follow_redirect = false
-    agent.get("https://cas.homeaway.com/auth/homeaway/login?service=https://ws.homeaway.com/oauth/authenticate?clientId=#{client_id}") do |page|
+    agent.get("https://cas.homeaway.com/auth/homeaway/login?service=#{encoded_service_url}") do |page|
       unless page.response['location']
         raise 'Login failed. Please check the email and password provided'
       end
-      return CGI.parse(URI.parse(page.response['location']).query)['ticket'].first
+      return page.response['location']
     end
   end
 end

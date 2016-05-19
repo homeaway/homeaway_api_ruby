@@ -39,13 +39,27 @@ This will automatically have your client authenticate with HomeAway. If you wish
 client.auth_url
 ```
 
-which will return back a URL as a String that the user of your application must be sent to. It is up to you to define how that takes place. Once your user goes to that url they will prompted to login with their HomeAway credentials. As soon as they do that and authorize your application to access their HomeAway data, the client's web browser will be redirected back to the redirect url that you specified when you created your client above. This url will have a code appended to it as a parameter named code. Once you are able to grab that code, you can use it with this gem:
+which will return back a URL as a String that the user of your application must be sent to. It is up to you to define how that takes place.
+
+_Note: You are recommended to save the `client.state` value. It is used to prevent your application from CSRF attacks ([http://homakov.blogspot.pt/2012/07/saferweb-most-common-oauth2.html](more details)). Saving it in the session is one way to achieve this, you will need to access this value again once the user is redirected back to your application and to ensure it's identicity with the one given then._
+
+Example with a RubyOnRails controller:
+
+```ruby
+session["homeaway-api.state"] = client.state
+```
+
+Once your user goes to that url they will be prompted to login with their HomeAway credentials. As soon as they do that and authorize your application to access their HomeAway data, the client's web browser will be redirected back to the redirect url that you specified when you created your client above. This url will have the `code` and `state` parameters appended to it.
+
+It's now time to ensure that this `state` parameter is present and identical to the previously saved `state` value. If this value have changed, it as then been tempered and certainly the reason of a CSRF attack, and should not perform the next step.
+
+Once the `state` validated and you are able to grab that code, you can use it with this gem:
 
 ```ruby
 client.oauth_code = code_received_from_redirect_url
 ```
 
-As soon as you make that assignment, the client will contact HomeAway and obtain a token that can be used for interacting with the HomeAway for that user for that particular session. By default, this token has a 6 month expiration time.
+As soon as you make that assignment, the client will contact HomeAway and obtain a token that can be used for interacting with the HomeAway account of that user. By default, this token has a 6 month expiration time.
 
 ### Using an existing token
 
