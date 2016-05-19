@@ -85,10 +85,10 @@ Each of the operations is detailed in the generated Yard documentation for this 
 ```ruby
 require 'homeaway_api'
 client = HomeAway::API::Client.new(client_id: your_client_id, client_secret: your_client_secret)
-response = @client.get_listing '123456', ['AVAILABILITY', 'RATES']
+response = @client.listing '123456', ['AVAILABILITY', 'RATES']
 paginator = @client.search '4 bathrooms new york'
 paginator.each do |search_result|
-  listing =  @client.get_listing search_result.listing_id, ['DETAILS', 'RATES', 'LOCATION']
+  listing =  @client.listing search_result.listing_id, ['DETAILS', 'RATES', 'LOCATION']
   puts listing
 end
 ```
