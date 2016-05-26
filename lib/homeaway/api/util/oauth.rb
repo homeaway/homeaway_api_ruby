@@ -49,7 +49,11 @@ module HomeAway
             @refresh_token = token.refresh_token
             @mode = :three_legged
             return true
-          rescue => _
+          rescue => e
+            if e.is_a? OAuth2::Error
+              error_class = HomeAway::API::Errors.for_http_code e.response.status
+              raise error_class.new(JSON.parse(e.response.response.body))
+            end
             raise HomeAway::API::Errors::UnauthorizedError.new
           end
         end
@@ -64,7 +68,7 @@ module HomeAway
           OAuth2::Client.new(@configuration.client_id,
                              @configuration.client_secret,
                              :site => oauth_site,
-                             :raise_errors => false
+                             :raise_errors => true
           )
         end
 
