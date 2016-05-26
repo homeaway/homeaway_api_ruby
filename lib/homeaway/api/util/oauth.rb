@@ -54,7 +54,7 @@ module HomeAway
               error_class = HomeAway::API::Errors.for_http_code e.response.status
               raise error_class.new(JSON.parse(e.response.response.body))
             end
-            raise HomeAway::API::Errors::UnauthorizedError.new
+            raise HomeAway::API::Errors::HomeAwayAPIError.new e.message
           end
         end
 
@@ -92,7 +92,7 @@ module HomeAway
               error_class = HomeAway::API::Errors.for_http_code e.response.status
               raise error_class.new(JSON.parse(e.response.response.body))
             end
-            raise HomeAway::API::Errors::UnauthorizedError.new
+            raise HomeAway::API::Errors::HomeAwayAPIError.new e.message
           end
         end
 
@@ -113,7 +113,7 @@ module HomeAway
               error_class = HomeAway::API::Errors.for_http_code e.response.status
               raise error_class.new(JSON.parse(e.response.response.body))
             end
-            raise HomeAway::API::Errors::UnauthorizedError.new
+            raise HomeAway::API::Errors::HomeAwayAPIError.new e.message
           end
         end
       end
