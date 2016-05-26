@@ -87,22 +87,34 @@ module HomeAway
             @refresh_token = token.refresh_token
             @mode = :two_legged
             return true
-          rescue => _
+          rescue => e
+            if e.is_a? OAuth2::Error
+              error_class = HomeAway::API::Errors.for_http_code e.response.status
+              raise error_class.new(JSON.parse(e.response.response.body))
+            end
             raise HomeAway::API::Errors::UnauthorizedError.new
           end
         end
 
         def refresh
-          token = OAuth2::AccessToken.new(oauth_client, nil, {:refresh_token => @refresh_token})
-          params = {
-              :headers => {'Authorization' => "Basic #{credentials}"}
-          }
-          token = token.refresh!(params)
-          @token = token.token
-          @token_expires = Time.at token.expires_at
-          @refresh_token = token.refresh_token
-          @mode = :three_legged
-          true
+          begin
+            token = OAuth2::AccessToken.new(oauth_client, nil, {:refresh_token => @refresh_token})
+            params = {
+                :headers => {'Authorization' => "Basic #{credentials}"}
+            }
+            token = token.refresh!(params)
+            @token = token.token
+            @token_expires = Time.at token.expires_at
+            @refresh_token = token.refresh_token
+            @mode = :three_legged
+            return true
+          rescue => e
+            if e.is_a? OAuth2::Error
+              error_class = HomeAway::API::Errors.for_http_code e.response.status
+              raise error_class.new(JSON.parse(e.response.response.body))
+            end
+            raise HomeAway::API::Errors::UnauthorizedError.new
+          end
         end
       end
     end
