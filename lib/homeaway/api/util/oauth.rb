@@ -34,7 +34,7 @@ module HomeAway
         # @return [String] a 48 characters long, securely random string, used to mitigate
         #                  CSRF attacks during the authorization process.
         def state
-          @_state ||= SecureRandom.hex(24)
+          @_state ||= @configuration.state || SecureRandom.hex(24)
         end
 
         # completes the oauth flow

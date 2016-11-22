@@ -87,18 +87,17 @@ def test_password
   raise NotImplementedError.new 'must supply a valid user password'
 end
 
-def scaffolded_client
-  client = HomeAway::API::Client.new(
-      client_id: client_id,
-      client_secret: client_secret,
-      connection_opts: {
-          ssl: {
-              verify: true
-          }
-      },
-      site: 'https://ws.homeaway.com',
-  )
-  client
+def scaffolded_client(opts = {})
+  HomeAway::API::Client.new({
+    client_id: client_id,
+    client_secret: client_secret,
+    connection_opts: {
+      ssl: {
+        verify: true
+      }
+    },
+    site: 'https://ws.homeaway.com'
+  }.merge(opts))
 end
 
 def get_code
