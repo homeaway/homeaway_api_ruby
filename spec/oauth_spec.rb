@@ -33,9 +33,18 @@ describe 'oauth', :vcr do
   end
 
   describe '#state' do
-    it 'generates a secure random string' do
-      expect(SecureRandom).to receive(:hex).with(24).and_return("SECURE_RANDOM_STRING")
-      expect(@client.state).to eq "SECURE_RANDOM_STRING"
+    context 'given the client was not configured with a user-specified value' do
+      it 'generates a secure random string' do
+        expect(SecureRandom).to receive(:hex).with(24).and_return("SECURE_RANDOM_STRING")
+        expect(@client.state).to eq "SECURE_RANDOM_STRING"
+      end
+    end
+
+    context 'given the client was configured with a user-specified value' do
+      it 'returns the user-specified value' do
+        @client = scaffolded_client state: 'USER_SPECIFIED_VALUE'
+        expect(@client.state).to eq "USER_SPECIFIED_VALUE"
+      end
     end
   end
 
@@ -47,9 +56,18 @@ describe 'oauth', :vcr do
     expect(@client.token).to_not be_nil
   end
 
-  it 'gets back the proper state when following the oauth flow' do
-    expect(@client).to receive(:state).and_return("SECURE_RANDOM_STRING")
-    expect(get_state).to eql "SECURE_RANDOM_STRING"
+  context 'given the client was not configured with a user-specified value' do
+    it 'gets back the proper state when following the oauth flow' do
+      expect(@client).to receive(:state).and_return("SECURE_RANDOM_STRING")
+      expect(get_state).to eql "SECURE_RANDOM_STRING"
+    end
+  end
+
+  context 'given the client was configured with a user-specified value' do
+    it 'gets back the proper state when following the oauth flow' do
+      @client = scaffolded_client state: 'USER_SPECIFIED_VALUE'
+      expect(get_state).to eql "USER_SPECIFIED_VALUE"
+    end
   end
 
   it 'can auth with only 2 legs' do

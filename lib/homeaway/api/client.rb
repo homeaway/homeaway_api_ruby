@@ -53,6 +53,7 @@ module HomeAway
       # @option opts [String] :client_id Your HomeAway API OAuth client id. Required here if not set globally
       # @option opts [String] :client_secret Your HomeAway API OAuth client secret. Required here if not set globally
       # @option opts [String] :refresh_token An existing token if you already have one saved from a previous usage of the api
+      # @option opts [String] :state A value that will be returned via callback
       # @return [HomeAway::API::Client] a newly instantiated HomeAway API client
       def initialize(opts={})
         @configuration = Hashie::Mash.new(self.class.default_configuration.merge(opts))
