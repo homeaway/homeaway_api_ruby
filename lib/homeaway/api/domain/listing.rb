@@ -27,9 +27,11 @@ module HomeAway
         #
         # @param id [String] The id of the listing.
         # @option opts [String] :q Use the q parameter to fetch specific listing details. Valid options are AVAILABILITY, DETAILS, LOCATIONS, PHOTOS, RATES, REVIEWS. If no value is given, the listing is returned with minimal content. Can be an array of multiple values.
+        # @option opts [String] :l Use the l parameter to specify the locale. For example: 'fr'
         # @return [HomeAway::API::Response] the result of the call to the API
-        def listing(id, q=nil)
+        def listing(id, q=nil, l=nil)
           params = {'id' => id.to_s}
+          params['locale'] = l unless l == nil
           params['q'] = HomeAway::API::Util::Validators.array(q) unless q == nil
           get '/public/listing', HomeAway::API::Util::Validators.query_keys(params)
         end
