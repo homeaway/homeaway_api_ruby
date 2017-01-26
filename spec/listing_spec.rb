@@ -48,6 +48,15 @@ describe 'getting listings', :vcr do
     }.to_not raise_error
   end
 
+  it 'accepts locale parameter' do
+    expect {
+      response = @client.listing '100000', nil, 'fr'
+      expect(response.listing_id).to eql '100000'
+      expect(response.source_locale).to eql 'en'
+      expect(response.source_locale_name).to eql 'anglais'
+    }.to_not raise_error
+  end
+
   it 'raises an error when making a GET for a listing with an invalid query' do
     expect {
       response = @client.listing '100000', 'RACKSONRACKSONRACKS'
