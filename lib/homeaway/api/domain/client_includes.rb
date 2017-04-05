@@ -24,6 +24,7 @@ require 'homeaway/api/domain/submit_review'
 require 'homeaway/api/domain/me'
 require 'homeaway/api/domain/my_reservations'
 require 'homeaway/api/domain/add_message'
+require 'homeaway/api/domain/add_lock_code'
 require 'homeaway/api/domain/conversation'
 
 module HomeAway
@@ -40,6 +41,7 @@ module HomeAway
       include HomeAway::API::Domain::Me
       include HomeAway::API::Domain::MyReservations
       include HomeAway::API::Domain::AddMessage
+      include HomeAway::API::Domain::AddLockCode
       include HomeAway::API::Domain::Conversation
     end
   end
